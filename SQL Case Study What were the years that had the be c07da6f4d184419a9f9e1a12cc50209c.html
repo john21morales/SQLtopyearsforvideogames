@@ -1,0 +1,675 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>SQL Case Study : What were the years that had the best video game releases?</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-opaquegray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="c07da6f4-d184-419a-9f9e-1a12cc50209c" class="page sans"><header><img class="page-cover-image" src="https://www.notion.so/images/page-cover/met_william_morris_1875.jpg" style="object-position:center 0%"/><div class="page-header-icon page-header-icon-with-cover"><span class="icon">👾</span></div><h1 class="page-title">SQL Case Study : What were the years that had the best video game releases?</h1></header><div class="page-body"><p id="ec25d3ee-ec53-4a22-8d24-6bb524e76e0e" class="">
+</p><h1 id="be974e2a-fed4-4019-9352-3844eba3170e" class="">Overview</h1><ul id="bd900260-8dc1-44cf-a24a-9237510ce06c" class="bulleted-list"><li style="list-style-type:disc">Our question : What were the years that had the best video game releases?</li></ul><figure id="1692bdaa-bf02-47ea-9986-cf47dc9ff7d1" class="image"><a href="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled.png"><img style="width:720px" src="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled.png"/></a></figure><p id="e2ea4d59-08d2-402a-b408-f8b3280b354b" class="">
+</p><h1 id="ac48a6c5-39de-47c3-8a7d-5787810fec4b" class="">Step 1) Check top 10 best selling games of all time</h1><ul id="efc65342-f6b9-499f-beba-078ea85584c9" class="bulleted-list"><li style="list-style-type:disc">Let&#x27;s begin by looking at some of the top selling video games of all time</li></ul><ul id="1a7c1016-bb22-4c2e-a557-f952f8d05300" class="bulleted-list"><li style="list-style-type:disc">From our query below, we can see that 1985-2017 is our yearly ranged based on the top 10 games sold.</li></ul><figure id="82a31151-74f0-4ba6-ae97-6dec088231c9" class="image"><a href="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%201.png"><img style="width:720px" src="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%201.png"/></a></figure><p id="9e1f4083-faf0-4f24-b7ea-3fe0e31e0e49" class="">
+</p><h1 id="1fab8391-c3ea-465f-b461-6936e54d72c0" class="">Step 2) Explore limitation of our database : Check NULL values</h1><ul id="cc624311-4b51-422d-bb99-230f12ccefd6" class="bulleted-list"><li style="list-style-type:disc">We can see that there are a little less than 10% of games that have unusable reviews data. Thus, it is still small enough to continue exploration but it is always good to know the limitations of our data source.</li></ul><figure id="221096e0-cf7a-4ebe-b704-78bc5cc3c32d" class="image"><a href="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%202.png"><img style="width:720px" src="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%202.png"/></a></figure><figure id="6f6c1738-165a-4dd7-9fdd-aa3657247579" class="image"><a href="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%203.png"><img style="width:720px" src="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%203.png"/></a></figure><p id="f3af7c52-1635-490b-a64e-b5e453ee27b0" class="">
+</p><h1 id="43233ddc-d447-4b66-874f-9a724ffcec63" class="">Step 3) Video Games that Critics Loved</h1><ul id="81512200-6faf-4139-80be-4108775f315f" class="bulleted-list"><li style="list-style-type:disc">It is a critic’s job to play and rate video games based on the quality of the video game, thus a video game critic’s opinion is highly valued when we are looking for the best video gaming years.</li></ul><ul id="ff4ea37b-9089-4278-8735-5e19b9b4d573" class="bulleted-list"><li style="list-style-type:disc">In this step, we want to check the top 10 video gaming years based on critic reviews.</li></ul><figure id="1cc5f968-ca18-4db4-9b8b-af9222f0646e" class="image"><a href="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%204.png"><img style="width:720px" src="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%204.png"/></a></figure><h1 id="6f0c33e1-97df-44f3-b4a4-b065b2422556" class="">Step 4) Filtering for low quantity years and NULL values</h1><ul id="fcb1f8bb-425d-4d17-b1b8-33e46d9d3326" class="bulleted-list"><li style="list-style-type:disc">We want to follow a larger sample size so that outliers do not skew our data. Thus we use HAVING to aggregately filter out years with less than 5 reviewed games.</li></ul><ul id="2d46aa2b-6298-41c4-8a1a-fb9d63884c4b" class="bulleted-list"><li style="list-style-type:disc">We also should put a num_games column in our table to show the quantity of reviewed games from that year because quantity also matters</li></ul><ul id="66cb0ef5-b38c-42d0-a1bf-a931f99514ec" class="bulleted-list"><li style="list-style-type:disc">We also will put NULL as 0 as it either was not worth reviewing or was not memorable enough to put in database — Could also be due to data collection error.</li></ul><figure id="781704d3-b3f3-4c18-b29c-155d42b89590" class="image"><a href="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%205.png"><img style="width:720px" src="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%205.png"/></a></figure><h1 id="4ba26041-6871-4a5d-8266-d28dc4eacd19" class="">Step 5) Years that dropped off critics’ favorites list due to having less than 5 reviewed games.</h1><ul id="f9756fbe-5aa7-4496-9732-da4a24a16cd0" class="bulleted-list"><li style="list-style-type:disc">Let’s check the years that had less than 5 reviewed games  in our database but scored high in critic reviews</li></ul><figure id="807ecc8e-cb16-4ca0-998b-3166103f7e94" class="image"><a href="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%206.png"><img style="width:720px" src="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%206.png"/></a></figure><h1 id="9be4c04f-10e7-4a2e-8c81-20e4e040aeae" class="">Step 6) Years video game players loved</h1><ul id="18cb849a-f475-4ca5-b81e-5bf9f918f543" class="bulleted-list"><li style="list-style-type:disc">We should also find the top 10 years that the general public views as having the best video games released according to their reviews.</li></ul><figure id="788ad53e-1dd1-4841-b368-77c707b84b37" class="image"><a href="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%207.png"><img style="width:720px" src="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%207.png"/></a></figure><h1 id="eb1c2754-1fad-40d7-9dd0-5a2357dfb323" class="">Step 7) Years that both players and critics loved</h1><ul id="54ca8bd2-e8c5-489e-bd0f-085fb3b078d2" class="bulleted-list"><li style="list-style-type:disc">We want to see which years that critics and the general public agreed had the best video game releases, based on their ratings in our database.</li></ul><ul id="7e664d48-8723-4bbd-9fde-e62624ee8eb8" class="bulleted-list"><li style="list-style-type:disc">We can use our queries from step 3) and step 5) and use an INNER JOIN to see which years were top 10 in both critic and general public opinions.</li></ul><ul id="d4f77b06-4b52-4024-8da9-630583c1e963" class="bulleted-list"><li style="list-style-type:disc">Top table : From STEP 3)</li></ul><ul id="02013380-f890-4bf0-8fd6-d8e735ff3c89" class="bulleted-list"><li style="list-style-type:disc">Bottom table : From STEP 5)</li></ul><figure id="6096186f-0809-4bd0-9908-722122a80d73" class="image"><a href="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%208.png"><img style="width:768px" src="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%208.png"/></a></figure><figure id="03f1b444-9b85-493a-a205-391ecc7cb0d2" class="image"><a href="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%209.png"><img style="width:768px" src="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%209.png"/></a></figure><h1 id="1e74244d-f07d-4d22-af7d-316330f52166" class="">Step 8) Sales in the best video game years</h1><ul id="78ca8fa8-843c-47ad-82f0-c90e84b76320" class="bulleted-list"><li style="list-style-type:disc">We know that quantity of games sold is also a great indicator of how great the games were that year.</li></ul><ul id="74a45f58-76c2-4fb7-a1f0-6795f7916d1b" class="bulleted-list"><li style="list-style-type:disc">Thus, we should find the top 10 best selling years by finding the cumulative sales of all video games in that year to see how successful the games were in terms of their ability to be sold.</li></ul><figure id="1a571448-3cee-4c49-8f62-683005d64af0" class="image"><a href="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%2010.png"><img style="width:768px" src="SQL%20Case%20Study%20What%20were%20the%20years%20that%20had%20the%20be%20c07da6f4d184419a9f9e1a12cc50209c/Untitled%2010.png"/></a></figure><p id="5977338b-403c-49a8-bf8d-070f290a343c" class="">
+</p><p id="7d81af58-1ce6-4013-a2c5-730ca4d75bf7" class="">
+</p><h1 id="8ab23b6b-1862-41b3-ba3c-6050d95f49a9" class="">Step 9) Conclusion</h1><ul id="311d5147-2d67-4162-bb61-7728452896a3" class="bulleted-list"><li style="list-style-type:disc">As we can see, critics agree that 1998 , 2002, and 2008 are the best years according to their reviews. It is also confirmed that these years are in the top 10 best selling years for video games, thus we can conclude that 1998, 2002, and 2008 had the best video game releases.</li></ul></div></article></body></html>
